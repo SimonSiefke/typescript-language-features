@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
+        "--disable-extensions",
+        "${workspaceFolder}/packages/extension/playground"
+      ],
+      "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"]
+    },
+    {
+      "name": "Run Extension (Webpack)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
+        "--disable-extensions",
+        "/tmp/webpack"
+      ],
+      "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"]
+    },
+    {
+      "name": "Run Extension (date-fns)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
+        "--disable-extensions",
+        "/tmp/date-fns"
+      ],
+      "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"]
+    },
+    {
+      "name": "Run Extension (mui-slowness)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
+        // "--disable-extensions",
+        "/tmp/mui-slowness"
+      ],
+      "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"]
+    }
+  ]
+}

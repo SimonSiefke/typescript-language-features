@@ -1,0 +1,25 @@
+{
+  "name": "typescript-language-features",
+  "version": "1.0.0-dev",
+  "description": "",
+  "engines": {
+    "vscode": "^1.44.0"
+  },
+  "publisher": "SimonSiefke",
+  "main": "dist/extensionMain.js",
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
+  "contributes": {},
+  "scripts": {},
+  "devDependencies": {
+    "@types/vscode": "^1.44.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^6.1.3"
+  }
+}

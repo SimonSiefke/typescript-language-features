@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig-base",
+  "references": [
+    {
+      "path": "../service/tsconfig.json"
+    }
+  ],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    // playgroudn options
+    "strict": false,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig-base",
+  "references": [],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": ["jest", "node"],
+    "resolveJsonModule": true,
+
+    // playgroudn options
+    "strict": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src"]
+}

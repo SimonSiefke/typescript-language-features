@@ -1,0 +1,24 @@
+{
+  "name": "typescript-language-features",
+  "version": "1.0.0-dev",
+  "scripts": {
+    "postinstall": "lerna bootstrap",
+    "dev": "concurrently \"tsc -b -w\" \"nodemon --watch **/dist/** --exec node scripts/autoreload.js\"",
+    "e2e": "cd packages/extension-test && npm run e2e",
+    "build": "tsc -b",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "concurrently": "^5.1.0",
+    "lerna": "^3.20.2",
+    "nodemon": "^2.0.3",
+    "typescript": "^3.8.3"
+  },
+  "renovate": {
+    "extends": "bitworkers"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
+  }
+}
