@@ -118,12 +118,31 @@ const withIntellicode: (
   return intellicode.plugin({ typescript }).create(info)
 }
 
+const cachedScriptSnapshots: {
+  [key: string]: import('typescript').IScriptSnapshot
+} = Object.create(null)
+
+const cachedFileExists: { [key: string]: boolean } = Object.create(null)
+
+const cachedDirectoryExists: { [key: string]: boolean } = Object.create(null)
+
+const cachedReadFile: { [key: string]: string | undefined } = Object.create(
+  null
+)
+
+const cachedResolvedModules: {
+  [containingFile: string]: {
+    [moduleName: string]: import('typescript').ResolvedModuleFull | undefined
+  }
+} = Object.create(null)
+
 const createTypescriptLanguageService = (absolutePath: string) => {
   const configFilePath = typescript.findConfigFile(
     absolutePath,
     typescript.sys.fileExists,
     'tsconfig.json'
   )
+  const configDirname = path.dirname(configFilePath as string)
 
   const configJson = typescript.readConfigFile(
     configFilePath as string,
@@ -151,29 +170,121 @@ const createTypescriptLanguageService = (absolutePath: string) => {
   console.log(parsedConfig.fileNames)
   console.log(parsedConfig.options)
 
-  const scriptSnapshotCache: {
-    [key: string]: import('typescript').IScriptSnapshot
-  } = Object.create(null)
-
   const caseSensitiveFileNames = true
   const newLine = '\n'
   const compilationSettings = parsedConfig.options
   // const currentDirectory = path.dirname(configFilePath as string)
   const currentDirectory = typescript.sys.getCurrentDirectory()
-  console.log('CWD')
-  console.log(typescript.sys.getCurrentDirectory())
-  console.log(currentDirectory)
   const scriptFileNames = parsedConfig.fileNames
   const defaultLibFileName = typescript.getDefaultLibFilePath(
     parsedConfig.options
   )
+  console.log('default lib')
+  console.log(defaultLibFileName)
   const languageServiceHost: import('typescript').LanguageServiceHost = {
-    directoryExists: typescript.sys.directoryExists,
-    fileExists: typescript.sys.fileExists,
-    getDirectories: typescript.sys.getDirectories,
-    readDirectory: typescript.sys.readDirectory,
-    readFile: typescript.sys.readFile,
-    realpath: typescript.sys.realpath,
+    resolveTypeReferenceDirectives: (
+      typeDirectiveNames,
+      containingFile,
+      redirectedReference,
+      options
+    ) => {
+      return typeDirectiveNames.map(
+        (typeDirectiveName) =>
+          typescript.resolveTypeReferenceDirective(
+            typeDirectiveName,
+            containingFile,
+            options,
+            {
+              fileExists: typescript.sys.fileExists,
+              readFile: typescript.sys.readFile,
+              directoryExists: typescript.sys.directoryExists,
+              getCurrentDirectory: typescript.sys.getCurrentDirectory,
+            }
+          ).resolvedTypeReferenceDirective
+      )
+    },
+    resolveModuleNames: (
+      moduleNames,
+      containingFile,
+      reusedNames,
+      redirectedReference,
+      options
+    ) => {
+      return moduleNames.map((moduleName) => {
+        if (
+          !(containingFile in cachedResolvedModules) ||
+          !(moduleName in cachedResolvedModules[containingFile])
+        ) {
+          console.log('RESOLVE module names' + containingFile + moduleName)
+          cachedResolvedModules[containingFile] =
+            cachedResolvedModules[containingFile] || Object.create(null)
+          cachedResolvedModules[containingFile][
+            moduleName
+          ] = typescript.resolveModuleName(
+            moduleName,
+            containingFile,
+            compilationSettings,
+            {
+              fileExists: typescript.sys.fileExists,
+              readFile: typescript.sys.readFile,
+              directoryExists: typescript.sys.directoryExists,
+              getCurrentDirectory: () => currentDirectory,
+              getDirectories: typescript.sys.getDirectories,
+            }
+          ).resolvedModule
+        }
+        return cachedResolvedModules[containingFile][moduleName]
+      })
+    },
+    // getScriptKind: (fileName) => {
+    //   console.log('get script kind' + fileName)
+    //   return typescript.ScriptKind.TS
+    // },
+    directoryExists: (directory) => {
+      if (!(directory in cachedDirectoryExists)) {
+        if (directory.startsWith(configDirname)) {
+          // process only files inside folder
+          cachedDirectoryExists[directory] = typescript.sys.directoryExists(
+            directory
+          )
+          console.log('directory exists' + directory)
+        } else {
+          cachedDirectoryExists[directory] = false
+        }
+      }
+      return cachedDirectoryExists[directory]
+    },
+    fileExists: (file) => {
+      if (!(file in cachedFileExists)) {
+        if (file.startsWith(configDirname)) {
+          // process only files inside folder
+          cachedFileExists[file] = typescript.sys.fileExists(file)
+        } else {
+          cachedFileExists[file] = false
+        }
+        configFilePath
+      }
+      return cachedFileExists[file]
+    },
+    getDirectories: (path) => {
+      console.log('get directories ' + path)
+      return typescript.sys.getDirectories(path)
+    },
+    readDirectory: (path) => {
+      console.log('read directory' + path)
+      return typescript.sys.readDirectory(path)
+    },
+    readFile: (path: string) => {
+      if (!(path in cachedReadFile)) {
+        console.log('read file' + path)
+        cachedReadFile[path] = typescript.sys.readFile(path)
+      }
+      return cachedReadFile[path]
+    },
+    realpath: (path) => {
+      console.log('realpath')
+      return typescript.sys.realpath!(path)
+    },
     useCaseSensitiveFileNames: () => caseSensitiveFileNames,
     getNewLine: () => newLine,
     getCompilationSettings: () => compilationSettings,
@@ -188,23 +299,25 @@ const createTypescriptLanguageService = (absolutePath: string) => {
       return `0`
     },
     getScriptSnapshot: (fileName) => {
-      if (fileName in scriptSnapshotCache) {
-        return scriptSnapshotCache[fileName]
-      }
       if (documentsProxy.hasDocument(`file://${fileName}`)) {
         return typescript.ScriptSnapshot.fromString(
           documentsProxy.getDocument(`file://${fileName}`).getText()
         )
       }
-      const scriptSnapshot = typescript.ScriptSnapshot.fromString(
-        typescript.sys.readFile(fileName) as string
-      )
-      scriptSnapshotCache[fileName] = scriptSnapshot
-      return scriptSnapshot
+      if (!(fileName in cachedScriptSnapshots)) {
+        cachedScriptSnapshots[fileName] = typescript.ScriptSnapshot.fromString(
+          typescript.sys.readFile(fileName) as string
+        )
+      }
+      return cachedScriptSnapshots[fileName]
     },
     getDefaultLibFileName: () => defaultLibFileName,
   }
-  let languageService = typescript.createLanguageService(languageServiceHost)
+  let languageService = typescript.createLanguageService(
+    languageServiceHost,
+    undefined,
+    false
+  )
   languageService = withIntellicode(
     languageService,
     languageServiceHost,

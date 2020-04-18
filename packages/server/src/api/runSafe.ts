@@ -1,6 +1,6 @@
 import { handleError } from './errorHandlingAndLogging'
 
-const measure = true
+const measure = false
 const measureLong = false
 
 /**
