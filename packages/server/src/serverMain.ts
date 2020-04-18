@@ -497,7 +497,7 @@ const getParameterListParts: (
           // Skip optional parameters
           const nameIsFollowedByOptionalIndicator = next && next.text === '?'
           if (!nameIsFollowedByOptionalIndicator) {
-            displayParts.push(part)
+            parts.push(part)
           }
           hasOptionalParameters =
             hasOptionalParameters || nameIsFollowedByOptionalIndicator
