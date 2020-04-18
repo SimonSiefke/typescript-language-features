@@ -1,5 +1,6 @@
 packages/extension/playground/*.*
 !packages/extension/playground/.gitkeep
+packages/extension/playground/**/*.*
 
 # Logs
 logs

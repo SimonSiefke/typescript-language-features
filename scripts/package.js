@@ -31,7 +31,7 @@ let extensionMain = fs
   .toString()
 
 extensionMain = extensionMain.replace(
-  '../server/dist/serverMain.js',
+  '../../server/dist/serverMain.js',
   './packages/server/dist/serverMain.js'
 )
 
