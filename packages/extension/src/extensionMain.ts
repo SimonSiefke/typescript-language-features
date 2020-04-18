@@ -55,7 +55,7 @@ const CLIENT_OPTIONS: LanguageClientOptions = {
 }
 
 const SERVER_OPTIONS: ServerOptions = {
-  module: '../../server/dist/serverMain.js',
+  module: path.join(__dirname, '../../server/dist/serverMain.js'),
   transport: TransportKind.ipc,
 }
 
