@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "lib": ["ESNext"],
+    "types": []
+  },
+  "include": ["completion.ts"]
+}

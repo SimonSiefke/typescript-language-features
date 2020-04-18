@@ -1,24 +1,8 @@
-import {
-  activateExtension,
-  createTestFile,
-  run,
-  TestCase,
-  createTestFileInBackground,
-} from '../util/test-utils'
+import { activateExtension, createTestFile, run, TestCase } from '../util/test-utils'
 
 describe('completion', () => {
   before(async () => {
     await createTestFile('completion.ts')
-    await createTestFileInBackground(
-      'tsconfig.json',
-      `{
-  "compilerOptions": {
-    "rootDir": ".",
-  },
-  "include": ["completion.ts"]
-}
-`
-    )
     await activateExtension()
   })
   it('basic', async () => {
