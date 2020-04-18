@@ -278,7 +278,7 @@ export async function run(
     const resolvedAfterCommands = testCase.afterTypeCommands || afterCommands
     for (const afterCommand of resolvedAfterCommands) {
       if (afterCommand === 'acceptSelectedSuggestion') {
-        await new Promise((r) => setTimeout(r, 10000))
+        await new Promise((r) => setTimeout(r, 15000))
       }
       await vscode.commands.executeCommand(afterCommand)
       if (afterCommand === 'editor.action.triggerSuggest') {
