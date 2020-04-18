@@ -15,8 +15,8 @@ install:
 
 stages:
   - test
-#   - name: release
-#     if: branch = master AND type = push AND fork = false
+  - name: release
+    if: branch = master AND type = push AND fork = false
 
 jobs:
   include:
@@ -24,3 +24,7 @@ jobs:
       script:
         - npm run e2e
         - npm test
+    # - stage: release
+    #   script:
+    #     - npm run package
+    #     - cd dist && npx semantic-release
