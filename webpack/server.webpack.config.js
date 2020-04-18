@@ -29,5 +29,5 @@ module.exports = withDefaults({
     filename: '[name].js',
     path: path.join(__dirname, '../dist', 'packages/server/dist'),
   },
-  plugins: [new BundleAnalyzerPlugin()],
+  // plugins: [new BundleAnalyzerPlugin()],
 })
