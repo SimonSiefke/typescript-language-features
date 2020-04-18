@@ -37,8 +37,7 @@ const initializeResult: InitializeResult = {
 connectionProxy.onInitialize = ({ initializationOptions }) => {
   intellicodePath = initializationOptions.intellicodePath
   const typescriptPath = initializationOptions.typescriptPath
-  typescript = require(typescriptPath)
-  console.log(initializationOptions)
+  typescript = eval('require')(typescriptPath)
   return initializeResult
 }
 
