@@ -10,6 +10,7 @@
     "bundle:client": "webpack --mode production --config ./webpack/client.webpack.config.js",
     "bundle:server": "webpack --mode production --config ./webpack/server.webpack.config.js",
     "package": "npm run clean && npm run bundle:client && npm run bundle:server && node scripts/package.js && npm run bundlesize",
+    "publish": "npm run package && cd dist && npx semantic-release",
     "test": "lerna run test",
     "bundlesize": "bundlesize"
   },
