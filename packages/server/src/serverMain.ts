@@ -36,6 +36,7 @@ const initializeResult: InitializeResult = {
 
 connectionProxy.onInitialize = ({ initializationOptions }) => {
   intellicodePath = initializationOptions.intellicodePath
+  console.log(intellicodePath)
   const typescriptPath = initializationOptions.typescriptPath
   typescript = eval('require')(typescriptPath)
   return initializeResult
@@ -68,12 +69,16 @@ export const createIntellicodePlugin: (
   if (!fs.existsSync(intellicodePluginPath) || !fs.existsSync(modelJsonPath)) {
     return undefined
   }
-  const intellicode = require(intellicodePluginPath) as TypescriptLanguageServicePlugin
-  const modelJson = require(modelJsonPath) as IntellicodeModelJson
+  const intellicode = eval('require')(
+    intellicodePluginPath
+  ) as TypescriptLanguageServicePlugin
+  const modelJson = eval('require')(modelJsonPath) as IntellicodeModelJson
   const jsModel = modelJson.find((model) => model.languageName === 'javascript')
   if (!jsModel) {
+    console.log('intellicode no js model')
     return undefined
   }
+  console.log('success intellicode model')
   return {
     plugin: intellicode,
     modelPath: jsModel.filePath,
@@ -610,9 +615,6 @@ connectionProxy.onCompletionResolve = (completionItem) => {
     if (!listParts.isFunctionCall) {
       return completionItem
     }
-    // const util = require('util')
-    // console.log(util.inspect(details, { depth: 10 }))
-    // console.log(util.inspect(listParts, { depth: 10 }))
     let parameters = listParts.parts
       .map((part, index) => `\${${index + 1}:${part.text}}`)
       .join(', ')
