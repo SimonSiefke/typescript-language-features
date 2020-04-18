@@ -1,3 +1,3 @@
-[![travis build](https://img.shields.io/travis/com/SimonSiefke/vue-language-features-3.svg)](https://travis-ci.com/SimonSiefke/vue-language-features-3) [![azure build](https://dev.azure.com/simonsiefke/Vue%20Language%20Features/_apis/build/status/SimonSiefke.vue-language-features-3?branchName=master)](https://dev.azure.com/simonsiefke/Vue%20Language%20Features/_build?definitionId=2)
+[![travis build](https://img.shields.io/travis/com/SimonSiefke/typescript-language-features.svg)](https://travis-ci.com/SimonSiefke/typescript-language-features) [![azure build](https://dev.azure.com/simonsiefke/TypeScript%20Language%20Features/_apis/build/status/SimonSiefke.typescript-language-features?branchName=master)](https://dev.azure.com/simonsiefke/typescript%20Language%20Features/_build?definitionId=3)
 
-# Vue Language Features
+# TypeScript Language Features
