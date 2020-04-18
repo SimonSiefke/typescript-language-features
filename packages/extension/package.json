@@ -3,7 +3,7 @@
   "version": "1.0.0-dev",
   "description": "",
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.44.2"
   },
   "publisher": "SimonSiefke",
   "main": "dist/extensionMain.js",
