@@ -205,11 +205,11 @@ const createTypescriptLanguageService = (absolutePath: string) => {
     getDefaultLibFileName: () => defaultLibFileName,
   }
   let languageService = typescript.createLanguageService(languageServiceHost)
-  // languageService = withIntellicode(
-  //   languageService,
-  //   languageServiceHost,
-  //   intellicodePath
-  // )
+  languageService = withIntellicode(
+    languageService,
+    languageServiceHost,
+    intellicodePath
+  )
   return languageService
 }
 
