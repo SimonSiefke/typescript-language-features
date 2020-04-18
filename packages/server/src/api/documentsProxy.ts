@@ -44,7 +44,7 @@ connectionProxy.onDidChangeTextDocument = ({
 }) => {
   const oldDocument = _TextDocument.create(
     textDocument.uri,
-    textDocument.uri.endsWith('.vue') ? 'vue' : 'typescript',
+    'typescript',
     0,
     cachedTextDocuments[textDocument.uri].text
   )
@@ -89,7 +89,7 @@ export const documentsProxy: DocumentsProxy = {
   getDocument: (uri) =>
     _TextDocument.create(
       uri,
-      uri.endsWith('vue') ? 'vue' : 'typescript',
+      'typescript',
       cachedTextDocuments[uri].version,
       cachedTextDocuments[uri].text
     ),

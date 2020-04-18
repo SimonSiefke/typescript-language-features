@@ -17,6 +17,25 @@ const getIntellicodePath: () => string | undefined = () => {
   return intelliCodeExtension.extensionPath
 }
 
+const getTypeScriptPathFromBuiltInVsCodeTypeScriptExtension: () =>
+  | string
+  | undefined = () => {
+  const typeScriptLanguageFeaturesExtension = vscode.extensions.getExtension(
+    'vscode.typescript'
+  )
+  if (!typeScriptLanguageFeaturesExtension) {
+    return undefined
+  }
+  return path.join(
+    typeScriptLanguageFeaturesExtension.extensionPath,
+    '..',
+    'node_modules',
+    'typescript',
+    'lib',
+    'typescript'
+  )
+}
+
 const CLIENT_OPTIONS: LanguageClientOptions = {
   documentSelector: [
     {
@@ -42,6 +61,7 @@ const CLIENT_OPTIONS: LanguageClientOptions = {
   ),
   initializationOptions: {
     intellicodePath: getIntellicodePath(),
+    typescriptPath: getTypeScriptPathFromBuiltInVsCodeTypeScriptExtension(),
   },
   // middleware: {
   //   provideCompletionItem: async (document, position, context, token, next) => {

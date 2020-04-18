@@ -1,6 +1,5 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as ts from 'typescript/lib/typescript'
 import {
   CompletionItemKind,
   CompletionList,
@@ -11,6 +10,9 @@ import {
 } from 'vscode-languageserver'
 import { connectionProxy } from './api/connectionProxy'
 import { documentsProxy } from './api/documentsProxy'
+
+let intellicodePath: string | undefined
+let typescript: typeof import('typescript/lib/tsserverlibrary')
 
 process.on('unhandledRejection', console.error)
 process.on('uncaughtException', console.error)
@@ -32,23 +34,23 @@ const initializeResult: InitializeResult = {
   },
 }
 
-let intellicodePath: string | undefined
-
 connectionProxy.onInitialize = ({ initializationOptions }) => {
   intellicodePath = initializationOptions.intellicodePath
+  const typescriptPath = initializationOptions.typescriptPath
+  typescript = require(typescriptPath)
   console.log(initializationOptions)
   return initializeResult
 }
 
 type IntellicodeModelJson = {
-  languageName: string
-  filePath: string
+  readonly languageName: string
+  readonly filePath: string
 }[]
 
 type TypescriptLanguageServicePlugin = (modules: {
   typescript: typeof import('typescript/lib/tsserverlibrary')
 }) => {
-  create: (info: any) => ts.LanguageService
+  create: (info: any) => import('typescript').LanguageService
 }
 
 export const createIntellicodePlugin: (
@@ -83,10 +85,10 @@ export const createIntellicodePlugin: (
 }
 
 const withIntellicode: (
-  languageService: ts.LanguageService,
-  languageServiceHost: ts.LanguageServiceHost,
+  languageService: import('typescript').LanguageService,
+  languageServiceHost: import('typescript').LanguageServiceHost,
   intellicodePath: string | undefined
-) => ts.LanguageService = (
+) => import('typescript').LanguageService = (
   languageService,
   languageServiceHost,
   intellicodePath
@@ -109,27 +111,27 @@ const withIntellicode: (
     },
   }
   console.log('ENABLED INTELLICODE')
-  return intellicode.plugin({ typescript: ts as any }).create(info)
+  return intellicode.plugin({ typescript }).create(info)
 }
 
 const createTypescriptLanguageService = (absolutePath: string) => {
-  const configFilePath = ts.findConfigFile(
+  const configFilePath = typescript.findConfigFile(
     absolutePath,
-    ts.sys.fileExists,
+    typescript.sys.fileExists,
     'tsconfig.json'
   )
 
-  const configJson = ts.readConfigFile(
+  const configJson = typescript.readConfigFile(
     configFilePath as string,
-    ts.sys.readFile
+    typescript.sys.readFile
   ).config
 
-  const parsedConfig = ts.parseJsonConfigFileContent(
+  const parsedConfig = typescript.parseJsonConfigFileContent(
     configJson,
     {
-      fileExists: ts.sys.fileExists,
-      readDirectory: ts.sys.readDirectory,
-      readFile: ts.sys.readFile,
+      fileExists: typescript.sys.fileExists,
+      readDirectory: typescript.sys.readDirectory,
+      readFile: typescript.sys.readFile,
       useCaseSensitiveFileNames: true,
     },
     path.dirname(configFilePath as string),
@@ -146,26 +148,28 @@ const createTypescriptLanguageService = (absolutePath: string) => {
   console.log(parsedConfig.options)
 
   const scriptSnapshotCache: {
-    [key: string]: ts.IScriptSnapshot
+    [key: string]: import('typescript').IScriptSnapshot
   } = Object.create(null)
 
   const caseSensitiveFileNames = true
   const newLine = '\n'
   const compilationSettings = parsedConfig.options
   // const currentDirectory = path.dirname(configFilePath as string)
-  const currentDirectory = ts.sys.getCurrentDirectory()
+  const currentDirectory = typescript.sys.getCurrentDirectory()
   console.log('CWD')
-  console.log(ts.sys.getCurrentDirectory())
+  console.log(typescript.sys.getCurrentDirectory())
   console.log(currentDirectory)
   const scriptFileNames = parsedConfig.fileNames
-  const defaultLibFileName = ts.getDefaultLibFilePath(parsedConfig.options)
-  const languageServiceHost: ts.LanguageServiceHost = {
-    directoryExists: ts.sys.directoryExists,
-    fileExists: ts.sys.fileExists,
-    getDirectories: ts.sys.getDirectories,
-    readDirectory: ts.sys.readDirectory,
-    readFile: ts.sys.readFile,
-    realpath: ts.sys.realpath,
+  const defaultLibFileName = typescript.getDefaultLibFilePath(
+    parsedConfig.options
+  )
+  const languageServiceHost: import('typescript').LanguageServiceHost = {
+    directoryExists: typescript.sys.directoryExists,
+    fileExists: typescript.sys.fileExists,
+    getDirectories: typescript.sys.getDirectories,
+    readDirectory: typescript.sys.readDirectory,
+    readFile: typescript.sys.readFile,
+    realpath: typescript.sys.realpath,
     useCaseSensitiveFileNames: () => caseSensitiveFileNames,
     getNewLine: () => newLine,
     getCompilationSettings: () => compilationSettings,
@@ -184,19 +188,19 @@ const createTypescriptLanguageService = (absolutePath: string) => {
         return scriptSnapshotCache[fileName]
       }
       if (documentsProxy.hasDocument(`file://${fileName}`)) {
-        return ts.ScriptSnapshot.fromString(
+        return typescript.ScriptSnapshot.fromString(
           documentsProxy.getDocument(`file://${fileName}`).getText()
         )
       }
-      const scriptSnapshot = ts.ScriptSnapshot.fromString(
-        ts.sys.readFile(fileName) as string
+      const scriptSnapshot = typescript.ScriptSnapshot.fromString(
+        typescript.sys.readFile(fileName) as string
       )
       scriptSnapshotCache[fileName] = scriptSnapshot
       return scriptSnapshot
     },
     getDefaultLibFileName: () => defaultLibFileName,
   }
-  let languageService = ts.createLanguageService(languageServiceHost)
+  let languageService = typescript.createLanguageService(languageServiceHost)
   // languageService = withIntellicode(
   //   languageService,
   //   languageServiceHost,
@@ -206,47 +210,47 @@ const createTypescriptLanguageService = (absolutePath: string) => {
 }
 
 const getCompletionItemKind: (
-  kind: ts.ScriptElementKind
+  kind: import('typescript').ScriptElementKind
 ) => CompletionItemKind = (kind) => {
   switch (kind) {
-    case ts.ScriptElementKind.primitiveType:
-    case ts.ScriptElementKind.keyword:
+    case typescript.ScriptElementKind.primitiveType:
+    case typescript.ScriptElementKind.keyword:
       return CompletionItemKind.Keyword
-    case ts.ScriptElementKind.constElement:
+    case typescript.ScriptElementKind.constElement:
       return CompletionItemKind.Constant
-    case ts.ScriptElementKind.letElement:
-    case ts.ScriptElementKind.variableElement:
-    case ts.ScriptElementKind.localVariableElement:
-    case ts.ScriptElementKind.alias:
+    case typescript.ScriptElementKind.letElement:
+    case typescript.ScriptElementKind.variableElement:
+    case typescript.ScriptElementKind.localVariableElement:
+    case typescript.ScriptElementKind.alias:
       return CompletionItemKind.Variable
-    case ts.ScriptElementKind.memberVariableElement:
-    case ts.ScriptElementKind.memberGetAccessorElement:
-    case ts.ScriptElementKind.memberSetAccessorElement:
+    case typescript.ScriptElementKind.memberVariableElement:
+    case typescript.ScriptElementKind.memberGetAccessorElement:
+    case typescript.ScriptElementKind.memberSetAccessorElement:
       return CompletionItemKind.Field
-    case ts.ScriptElementKind.functionElement:
-    case ts.ScriptElementKind.localFunctionElement:
+    case typescript.ScriptElementKind.functionElement:
+    case typescript.ScriptElementKind.localFunctionElement:
       return CompletionItemKind.Function
-    case ts.ScriptElementKind.memberFunctionElement:
-    case ts.ScriptElementKind.constructSignatureElement:
-    case ts.ScriptElementKind.callSignatureElement:
-    case ts.ScriptElementKind.indexSignatureElement:
+    case typescript.ScriptElementKind.memberFunctionElement:
+    case typescript.ScriptElementKind.constructSignatureElement:
+    case typescript.ScriptElementKind.callSignatureElement:
+    case typescript.ScriptElementKind.indexSignatureElement:
       return CompletionItemKind.Method
-    case ts.ScriptElementKind.enumElement:
+    case typescript.ScriptElementKind.enumElement:
       return CompletionItemKind.Enum
-    case ts.ScriptElementKind.moduleElement:
-    case ts.ScriptElementKind.externalModuleName:
+    case typescript.ScriptElementKind.moduleElement:
+    case typescript.ScriptElementKind.externalModuleName:
       return CompletionItemKind.Module
-    case ts.ScriptElementKind.classElement:
-    case ts.ScriptElementKind.typeElement:
+    case typescript.ScriptElementKind.classElement:
+    case typescript.ScriptElementKind.typeElement:
       return CompletionItemKind.Class
-    case ts.ScriptElementKind.interfaceElement:
+    case typescript.ScriptElementKind.interfaceElement:
       return CompletionItemKind.Interface
-    case ts.ScriptElementKind.warning:
-    case ts.ScriptElementKind.scriptElement:
+    case typescript.ScriptElementKind.warning:
+    case typescript.ScriptElementKind.scriptElement:
       return CompletionItemKind.File
-    case ts.ScriptElementKind.directory:
+    case typescript.ScriptElementKind.directory:
       return CompletionItemKind.Folder
-    case ts.ScriptElementKind.string:
+    case typescript.ScriptElementKind.string:
       return CompletionItemKind.Constant
     default:
       return CompletionItemKind.Property
@@ -254,31 +258,31 @@ const getCompletionItemKind: (
 }
 
 const getCommitCharacters: (
-  tsEntry: ts.CompletionEntry
+  tsEntry: import('typescript').CompletionEntry
 ) => string[] | undefined = (tsEntry) => {
   const commitCharacters: string[] = []
   switch (tsEntry.kind) {
-    case ts.ScriptElementKind.memberGetAccessorElement:
-    case ts.ScriptElementKind.memberSetAccessorElement:
-    case ts.ScriptElementKind.constructSignatureElement:
-    case ts.ScriptElementKind.callSignatureElement:
-    case ts.ScriptElementKind.indexSignatureElement:
-    case ts.ScriptElementKind.enumElement:
-    case ts.ScriptElementKind.interfaceElement:
+    case typescript.ScriptElementKind.memberGetAccessorElement:
+    case typescript.ScriptElementKind.memberSetAccessorElement:
+    case typescript.ScriptElementKind.constructSignatureElement:
+    case typescript.ScriptElementKind.callSignatureElement:
+    case typescript.ScriptElementKind.indexSignatureElement:
+    case typescript.ScriptElementKind.enumElement:
+    case typescript.ScriptElementKind.interfaceElement:
       commitCharacters.push('.', ';')
       break
-    case ts.ScriptElementKind.moduleElement:
-    case ts.ScriptElementKind.alias:
-    case ts.ScriptElementKind.constElement:
-    case ts.ScriptElementKind.letElement:
-    case ts.ScriptElementKind.variableElement:
-    case ts.ScriptElementKind.localVariableElement:
-    case ts.ScriptElementKind.memberVariableElement:
-    case ts.ScriptElementKind.classElement:
-    case ts.ScriptElementKind.functionElement:
-    case ts.ScriptElementKind.memberFunctionElement:
-    case ts.ScriptElementKind.keyword:
-    case ts.ScriptElementKind.parameterElement:
+    case typescript.ScriptElementKind.moduleElement:
+    case typescript.ScriptElementKind.alias:
+    case typescript.ScriptElementKind.constElement:
+    case typescript.ScriptElementKind.letElement:
+    case typescript.ScriptElementKind.variableElement:
+    case typescript.ScriptElementKind.localVariableElement:
+    case typescript.ScriptElementKind.memberVariableElement:
+    case typescript.ScriptElementKind.classElement:
+    case typescript.ScriptElementKind.functionElement:
+    case typescript.ScriptElementKind.memberFunctionElement:
+    case typescript.ScriptElementKind.keyword:
+    case typescript.ScriptElementKind.parameterElement:
       commitCharacters.push('.', ',', ';')
       break
   }
@@ -286,7 +290,9 @@ const getCommitCharacters: (
 }
 
 const toCompletionList: (
-  completions: ts.WithMetadata<ts.CompletionInfo>,
+  completions: import('typescript').WithMetadata<
+    import('typescript').CompletionInfo
+  >,
   fsPath: string,
   offset: number
 ) => CompletionList = (completions, fsPath, offset) => {
@@ -319,7 +325,7 @@ const toCompletionList: (
   return completionList
 }
 
-let languageService: ts.LanguageService
+let languageService: import('typescript').LanguageService
 const getLanguageService = (fsPath: string) => {
   if (!languageService) {
     languageService = createTypescriptLanguageService(fsPath)
@@ -417,13 +423,13 @@ const enum DisplayPartKind {
 }
 
 const getParameterListParts: (
-  displayParts: ts.SymbolDisplayPart[]
+  displayParts: import('typescript').SymbolDisplayPart[]
 ) => {
-  parts: ts.SymbolDisplayPart[]
+  parts: import('typescript').SymbolDisplayPart[]
   hasOptionalParameters: boolean
   isFunctionCall: boolean
 } = (displayParts) => {
-  const parts: ts.SymbolDisplayPart[] = []
+  const parts: import('typescript').SymbolDisplayPart[] = []
   let isInMethod = false
   let hasOptionalParameters = false
   let parenCount = 0
@@ -491,7 +497,7 @@ const getParameterListParts: (
           // Skip optional parameters
           const nameIsFollowedByOptionalIndicator = next && next.text === '?'
           if (!nameIsFollowedByOptionalIndicator) {
-            parts.push(part)
+            displayParts.push(part)
           }
           hasOptionalParameters =
             hasOptionalParameters || nameIsFollowedByOptionalIndicator
@@ -549,7 +555,7 @@ connectionProxy.onCompletionResolve = (completionItem) => {
     completionItem.data.offset,
     completionItem.data.name,
     {
-      semicolons: ts.SemicolonPreference.Remove,
+      semicolons: typescript.SemicolonPreference.Remove,
     },
     completionItem.data.source,
     {
@@ -559,9 +565,9 @@ connectionProxy.onCompletionResolve = (completionItem) => {
   if (!details) {
     return completionItem
   }
-  completionItem.detail = ts.displayPartsToString(details.displayParts)
+  completionItem.detail = typescript.displayPartsToString(details.displayParts)
   if (details.source) {
-    const importPath = ts.displayPartsToString(details.source)
+    const importPath = typescript.displayPartsToString(details.source)
     const autoImportLabel = `Auto import from ${importPath}`
     completionItem.detail = `${autoImportLabel}\n${completionItem.detail}`
   }
