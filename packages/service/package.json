@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/serviceMain.js",
   "scripts": {
-    "test": "jest",
+    "test": "echo run tests",
     "benchmark": "ts-node src/parseRegions.benchmark.ts",
     "build": "tsc -b"
   },
