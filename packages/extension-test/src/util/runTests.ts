@@ -20,15 +20,31 @@ const runTest = async (test: Test, dirname: string) => {
       : test.path
     const workspacePathSrc = path.join(
       dirname.replace('dist', 'src'),
-      `${test.path}/${testWorkspaceName}-workspace`,
+      `${test.path}/${testWorkspaceName}-workspace`
     )
     const workspacePathDist = path.join(
       dirname,
-      `${test.path}/${testWorkspaceName}-workspace-dist`,
+      `${test.path}/${testWorkspaceName}-workspace-dist`
     )
     await fs.copy(workspacePathSrc, workspacePathDist)
     const extensionTestsPath = path.join(dirname, test.path, 'run.js')
     const vscodeExecutablePath = await downloadAndUnzipVSCode(VSCODE_VERSION)
+    if (
+      fs.existsSync(
+        path.join(
+          path.dirname(vscodeExecutablePath),
+          'resources/app/extensions/typescript-language-features'
+        )
+      )
+    ) {
+      fs.removeSync(
+        path.join(
+          path.dirname(vscodeExecutablePath),
+          'resources/app/extensions/typescript-language-features'
+        )
+      )
+    }
+    console.log(vscodeExecutablePath)
     const launchArgs: string[] = ['--disable-extensions', workspacePathDist]
     await _runTests({
       vscodeExecutablePath,
@@ -48,7 +64,7 @@ const runTest = async (test: Test, dirname: string) => {
 }
 
 export const runTests = async (tests: readonly Test[], dirname: string) => {
-  const onlyTest = tests.find(test => test.only)
+  const onlyTest = tests.find((test) => test.only)
   if (onlyTest) {
     await runTest(onlyTest, dirname)
     return

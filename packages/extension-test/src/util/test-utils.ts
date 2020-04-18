@@ -10,8 +10,8 @@ assert.ok(process.env.extensionPath)
 const packageJSON = JSON.parse(
   fs.readFileSync(
     path.join(process.env.extensionPath as string, 'package.json'),
-    'utf-8',
-  ),
+    'utf-8'
+  )
 ) as { name: string; publisher: string }
 
 // console.log(JSON.stringify(packageJSON));
@@ -20,7 +20,7 @@ assert.ok(packageJSON.publisher)
 assert.ok(packageJSON.name)
 
 const extension = vscode.extensions.getExtension(
-  `${packageJSON.publisher}.${packageJSON.name}`,
+  `${packageJSON.publisher}.${packageJSON.name}`
 ) as vscode.Extension<any>
 // const extension = vscode.extensions.getExtension(
 //   `SimonSiefke.vue-language-features`
@@ -67,11 +67,11 @@ export interface TestCase {
 
 export async function createTestFile(
   fileName: string,
-  content: string = '',
+  content: string = ''
 ): Promise<void> {
   const filePath = path.join(
     vscode.workspace.workspaceFolders![0].uri.fsPath,
-    fileName,
+    fileName
   )
   fs.ensureDirSync(path.dirname(filePath))
   fs.writeFileSync(filePath, content)
@@ -82,11 +82,11 @@ export async function createTestFile(
 
 export async function createTestFileInBackground(
   fileName: string,
-  content: string = '',
+  content: string = ''
 ): Promise<void> {
   const filePath = path.join(
     vscode.workspace.workspaceFolders![0].uri.fsPath,
-    fileName,
+    fileName
   )
   fs.ensureDirSync(path.dirname(filePath))
   fs.writeFileSync(filePath, content)
@@ -107,19 +107,19 @@ export async function setText(text: string): Promise<void> {
   const document = vscode.window.activeTextEditor!.document
   const all = new vscode.Range(
     document.positionAt(0),
-    document.positionAt(document.getText().length),
+    document.positionAt(document.getText().length)
   )
-  await vscode.window.activeTextEditor!.edit(editBuilder =>
-    editBuilder.replace(all, text),
+  await vscode.window.activeTextEditor!.edit((editBuilder) =>
+    editBuilder.replace(all, text)
   )
 }
 
 function setCursorPositions(offsets: number[]): void {
-  const positions = offsets.map(offset =>
-    vscode.window.activeTextEditor!.document.positionAt(offset),
+  const positions = offsets.map((offset) =>
+    vscode.window.activeTextEditor!.document.positionAt(offset)
   )
   const selections = positions.map(
-    position => new vscode.Selection(position, position),
+    (position) => new vscode.Selection(position, position)
   )
   vscode.window.activeTextEditor!.selections = selections
 }
@@ -131,22 +131,22 @@ async function typeLiteral(text: string, undoStops = false): Promise<void> {
     {
       undoStopAfter: undoStops,
       undoStopBefore: undoStops,
-    },
+    }
   )
 }
 
 async function typeDelete(times: number = 1): Promise<void> {
-  const offsets = vscode.window.activeTextEditor!.selections.map(selection =>
-    vscode.window.activeTextEditor!.document.offsetAt(selection.active),
+  const offsets = vscode.window.activeTextEditor!.selections.map((selection) =>
+    vscode.window.activeTextEditor!.document.offsetAt(selection.active)
   )
-  await new Promise(async resolve => {
-    await vscode.window.activeTextEditor!.edit(editBuilder => {
+  await new Promise(async (resolve) => {
+    await vscode.window.activeTextEditor!.edit((editBuilder) => {
       for (const offset of offsets) {
         editBuilder.delete(
           new vscode.Range(
             vscode.window.activeTextEditor!.document.positionAt(offset - times),
-            vscode.window.activeTextEditor!.document.positionAt(offset),
-          ),
+            vscode.window.activeTextEditor!.document.positionAt(offset)
+          )
         )
       }
     })
@@ -156,13 +156,13 @@ async function typeDelete(times: number = 1): Promise<void> {
 async function type(
   text: string,
   speed = 150,
-  undoStops = false,
+  undoStops = false
 ): Promise<void> {
   for (let i = 0; i < text.length; i++) {
     if (i === 0) {
-      await new Promise(resolve => setTimeout(resolve, speed / 2))
+      await new Promise((resolve) => setTimeout(resolve, speed / 2))
     } else {
-      await new Promise(resolve => setTimeout(resolve, speed))
+      await new Promise((resolve) => setTimeout(resolve, speed))
     }
     if (text.slice(i).startsWith('{backspace}')) {
       await typeDelete()
@@ -192,7 +192,7 @@ async function type(
 }
 
 async function waitForEdits(timeout: 'never' | number) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const disposable = vscode.workspace.onDidChangeTextDocument(() => {
       disposable.dispose()
       resolve()
@@ -209,10 +209,10 @@ export function getText(): string {
 
 export async function run(
   testCases: readonly TestCase[],
-  { speed = 0, timeout = 40, afterCommands = [] as any[] } = {},
+  { speed = 0, timeout = 40, afterCommands = [] as any[] } = {}
 ) {
   // await setText('')
-  const only = testCases.filter(testCase => testCase.only)
+  const only = testCases.filter((testCase) => testCase.only)
   const applicableTestCases = only.length ? only : testCases
   for (const testCase of applicableTestCases) {
     if (testCase.skip) {
@@ -241,14 +241,14 @@ export async function run(
       const [start, end] = testCase.selection
       vscode.window.activeTextEditor!.selection = new vscode.Selection(
         vscode.window.activeTextEditor!.document.positionAt(start),
-        vscode.window.activeTextEditor!.document.positionAt(end),
+        vscode.window.activeTextEditor!.document.positionAt(end)
       )
     }
     if (testCase.type) {
       await type(
         testCase.type,
         testCase.speed || speed,
-        testCase.undoStops || false,
+        testCase.undoStops || false
       )
       const autoCompleteTimeout = testCase.timeout || timeout
       await waitForEdits(autoCompleteTimeout)
@@ -261,7 +261,7 @@ export async function run(
       let success = false
       while (passedTime < maxPassedTime) {
         const diagnostics = vscode.languages.getDiagnostics(
-          vscode.window.activeTextEditor!.document.uri,
+          vscode.window.activeTextEditor!.document.uri
         )
         if (diagnostics.length > 0) {
           console.log('length' + diagnostics.length)
@@ -269,7 +269,7 @@ export async function run(
           success = true
           break
         }
-        await new Promise(resolve => setTimeout(resolve, pollingInterval))
+        await new Promise((resolve) => setTimeout(resolve, pollingInterval))
       }
       if (!success) {
         throw new Error('no diagnostics received')
@@ -277,14 +277,18 @@ export async function run(
     }
     const resolvedAfterCommands = testCase.afterTypeCommands || afterCommands
     for (const afterCommand of resolvedAfterCommands) {
+      if (afterCommand === 'acceptSelectedSuggestion') {
+        await new Promise((r) => setTimeout(r, 100))
+      }
       await vscode.commands.executeCommand(afterCommand)
       if (afterCommand === 'editor.action.triggerSuggest') {
         await vscode.commands.executeCommand(
           'vscode.executeCompletionItemProvider',
           vscode.window.activeTextEditor?.document.uri,
-          vscode.window.activeTextEditor?.selection.active,
+          vscode.window.activeTextEditor?.selection.active
         )
       }
+
       const autoCompleteTimeout = testCase.timeout || timeout
       await waitForEdits(autoCompleteTimeout)
     }
@@ -296,10 +300,10 @@ export async function run(
       const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit()
       for (const [oldFile, newFile] of Object.entries(testCase.renameFiles)) {
         const oldUri = vscode.Uri.file(
-          path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, oldFile),
+          path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, oldFile)
         )
         const newUri = vscode.Uri.file(
-          path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, newFile),
+          path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, newFile)
         )
         workspaceEdit.renameFile(oldUri, newUri)
       }
@@ -309,21 +313,21 @@ export async function run(
       await new Promise(() => {})
     }
     if (testCase.applyCodeAction) {
-      await new Promise(r => setTimeout(r, 1000))
+      await new Promise((r) => setTimeout(r, 1000))
       const codeActions: vscode.CodeAction[] =
         (await vscode.commands.executeCommand(
           'vscode.executeCodeActionProvider',
           vscode.window.activeTextEditor!.document.uri,
-          vscode.window.activeTextEditor!.selection,
+          vscode.window.activeTextEditor!.selection
         )) || []
       const found = codeActions.find(
-        codeAction => codeAction.title === testCase.applyCodeAction,
+        (codeAction) => codeAction.title === testCase.applyCodeAction
       )
       assert(found)
       if (found!.command) {
         await vscode.commands.executeCommand(
           found!.command.command,
-          ...found!.command!.arguments!,
+          ...found!.command!.arguments!
         )
       }
     }
@@ -332,7 +336,7 @@ export async function run(
         break outer
       }
       for (let i = 0; i < 20; i++) {
-        await new Promise(resolve => setTimeout(resolve, 15))
+        await new Promise((resolve) => setTimeout(resolve, 15))
         if (getText() === testCase.expect.replace(/\|/g, '')) {
           break outer
         }
@@ -341,7 +345,7 @@ export async function run(
     }
     if (testCase.expectCursorOffset !== undefined) {
       const offset = vscode.window.activeTextEditor!.document.offsetAt(
-        vscode.window.activeTextEditor!.selection.active,
+        vscode.window.activeTextEditor!.selection.active
       )
       assert.equal(offset, testCase.expectCursorOffset)
     }
@@ -351,14 +355,14 @@ export async function run(
       }
       await vscode.workspace.saveAll()
       for (const [relativePath, expectedContent] of Object.entries(
-        testCase.expectOtherFiles,
+        testCase.expectOtherFiles
       )) {
         const absolutePath = path.join(
           vscode.workspace.workspaceFolders![0].uri.fsPath,
-          relativePath,
+          relativePath
         )
         const document = await vscode.workspace.openTextDocument(
-          vscode.Uri.file(absolutePath),
+          vscode.Uri.file(absolutePath)
         )
         const actualContent = document.getText()
         assert.equal(actualContent, expectedContent)
@@ -373,13 +377,13 @@ export async function run(
       let success = false
       outer: while (passedTime < maxPassedTime) {
         diagnostics = vscode.languages.getDiagnostics(
-          vscode.window.activeTextEditor!.document.uri,
+          vscode.window.activeTextEditor!.document.uri
         )
         if (diagnostics.length === testCase.expectDiagnostics.length) {
           for (const expectedDiagnostic of testCase.expectDiagnostics) {
             let matches = diagnostics
             if (expectedDiagnostic.message) {
-              matches = matches.filter(match => {
+              matches = matches.filter((match) => {
                 if (typeof expectedDiagnostic.message === 'string') {
                   return match.message === expectedDiagnostic.message
                 }
@@ -387,27 +391,29 @@ export async function run(
               })
             }
             if (expectedDiagnostic.offset) {
-              matches = matches.filter(match => {
+              matches = matches.filter((match) => {
                 const start = vscode.window.activeTextEditor!.document.offsetAt(
-                  match.range.start,
+                  match.range.start
                 )
                 return start === expectedDiagnostic.offset
               })
             }
             if (expectedDiagnostic.length) {
-              matches = matches.filter(match => {
+              matches = matches.filter((match) => {
                 const start = vscode.window.activeTextEditor!.document.offsetAt(
-                  match.range.start,
+                  match.range.start
                 )
                 const end = vscode.window.activeTextEditor!.document.offsetAt(
-                  match.range.end,
+                  match.range.end
                 )
                 return end - start === expectedDiagnostic.length
               })
             }
             if (matches.length === 0) {
               passedTime += pollingInterval
-              await new Promise(resolve => setTimeout(resolve, pollingInterval))
+              await new Promise((resolve) =>
+                setTimeout(resolve, pollingInterval)
+              )
               continue
             } else {
               success = true
@@ -416,7 +422,7 @@ export async function run(
           }
         }
         passedTime += pollingInterval
-        await new Promise(resolve => setTimeout(resolve, pollingInterval))
+        await new Promise((resolve) => setTimeout(resolve, pollingInterval))
       }
       if (!success) {
         console.log(JSON.stringify(testCase.expectDiagnostics))

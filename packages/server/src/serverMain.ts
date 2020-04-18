@@ -1,17 +1,16 @@
+import * as fs from 'fs'
 import * as path from 'path'
-import * as ts from 'typescript'
+import * as ts from 'typescript/lib/typescript'
 import {
+  CompletionItemKind,
   CompletionList,
   InitializeResult,
+  InsertTextFormat,
   TextDocumentSyncKind,
   TextEdit,
-  InsertTextFormat,
-  CompletionItemKind,
 } from 'vscode-languageserver'
 import { connectionProxy } from './api/connectionProxy'
 import { documentsProxy } from './api/documentsProxy'
-import { Position } from 'vscode-languageserver-textdocument'
-import * as fs from 'fs'
 
 process.on('unhandledRejection', console.error)
 process.on('uncaughtException', console.error)
@@ -46,7 +45,7 @@ type IntellicodeModelJson = {
   filePath: string
 }[]
 
-export type TypescriptLanguageServicePlugin = (modules: {
+type TypescriptLanguageServicePlugin = (modules: {
   typescript: typeof import('typescript/lib/tsserverlibrary')
 }) => {
   create: (info: any) => ts.LanguageService
