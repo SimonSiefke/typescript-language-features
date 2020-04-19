@@ -41,6 +41,6 @@ fs.writeFileSync(
 )
 
 fs.copySync(
-  path.join(root, 'packages/server/lib'),
+  path.join(root, 'packages/service/lib'),
   path.join(root, 'dist', 'packages', 'server', 'lib')
 )

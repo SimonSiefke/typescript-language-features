@@ -17,3 +17,7 @@ https://www.google.com/searchq=better+code+completion+algorithm&oq=better+code+c
 ctrl+k uses current word
 
  -->
+
+<!--
+https://github.com/microsoft/vscode/issues/80016
+ -->
