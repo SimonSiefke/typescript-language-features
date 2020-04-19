@@ -48,7 +48,7 @@ connectionProxy.onInitialize = ({ initializationOptions }) => {
 
   const typescript = eval('require')(
     typescriptPath
-  ) as typeof import('typescript/lib/tsserverlibrary')
+  ) as typeof import('typescript/lib/typescript')
   const positionAt = (fsPath: string, offset: number) => {
     return documentsProxy.getDocument(`file://${fsPath}`).positionAt(offset)
   }

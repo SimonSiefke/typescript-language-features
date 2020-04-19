@@ -154,7 +154,7 @@ export const onCompletionResolve = ({
   positionAt,
   offsetAt,
 }: {
-  typescript: typeof import('typescript/lib/tsserverlibrary')
+  typescript: typeof import('typescript/lib/typescript')
   positionAt: (fsPath: string, offset: number) => Position
   offsetAt: (fsPath: string, position: Position) => number
 }) => (languageService: LanguageService, completionItem: CompletionItem) => {

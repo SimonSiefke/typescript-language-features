@@ -10,6 +10,7 @@
     "outDir": "dist",
     // playgroudn options
     "strict": false,
+    "noImplicitAny": false,
     "noUnusedParameters": false,
     "noUnusedLocals": false,
     "types": []

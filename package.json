@@ -2,7 +2,7 @@
   "name": "typescript-language-features",
   "version": "1.0.0-dev",
   "scripts": {
-    "postinstall": "lerna bootstrap",
+    "postinstall": "lerna bootstrap && tsc -b",
     "dev": "concurrently \"tsc -b -w\" \"nodemon --watch **/dist/** --exec node scripts/autoreload.js\"",
     "e2e": "cd packages/extension-test && npm run e2e",
     "build": "tsc -b",

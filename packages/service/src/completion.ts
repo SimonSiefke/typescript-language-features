@@ -9,7 +9,7 @@ export const onCompletion = ({
   typescript,
   offsetAt,
 }: {
-  typescript: typeof import('typescript/lib/tsserverlibrary')
+  typescript: typeof import('typescript/lib/typescript')
   offsetAt: (fsPath: string, position: Position) => number
 }) => {
   const getCompletionItemKind: (

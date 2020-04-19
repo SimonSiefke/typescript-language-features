@@ -7,7 +7,7 @@ type IntellicodeModelJson = {
 }[]
 
 type TypescriptLanguageServicePlugin = (modules: {
-  typescript: typeof import('typescript/lib/tsserverlibrary')
+  typescript: typeof import('typescript/lib/typescript')
 }) => {
   create: (info: any) => import('typescript').LanguageService
 }
@@ -67,7 +67,7 @@ const cachedResolvedModules: {
 
 export const createTypescriptLanguageService = (
   absolutePath: string,
-  typescript: typeof import('typescript/lib/tsserverlibrary'),
+  typescript: typeof import('typescript/lib/typescript'),
   intellicodePath: string | undefined,
   hasFile: (path: string) => boolean,
   getFileVersion: (path: string) => string,
