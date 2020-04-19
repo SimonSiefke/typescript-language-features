@@ -39,3 +39,8 @@ fs.writeFileSync(
   path.join(root, `dist/packages/extension/dist/extensionMain.js`),
   extensionMain
 )
+
+fs.copySync(
+  path.join(root, 'packages/server/lib'),
+  path.join(root, 'dist', 'packages', 'server', 'lib')
+)

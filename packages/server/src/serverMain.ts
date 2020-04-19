@@ -176,9 +176,11 @@ const createTypescriptLanguageService = (absolutePath: string) => {
   // const currentDirectory = path.dirname(configFilePath as string)
   const currentDirectory = typescript.sys.getCurrentDirectory()
   const scriptFileNames = parsedConfig.fileNames
-  const defaultLibFileName = typescript.getDefaultLibFilePath(
-    parsedConfig.options
-  )
+  // const defaultLibFileName1 = typescript.getDefaultLibFilePath(
+  //   parsedConfig.options
+  // )
+  // console.log(defaultLibFileName1)
+  const defaultLibFileName = path.join(__dirname, '../lib/lib.d.ts')
   console.log('default lib')
   console.log(defaultLibFileName)
   const languageServiceHost: import('typescript').LanguageServiceHost = {
@@ -300,6 +302,11 @@ const createTypescriptLanguageService = (absolutePath: string) => {
     },
     getScriptSnapshot: (fileName) => {
       if (documentsProxy.hasDocument(`file://${fileName}`)) {
+        // let s:import('typescript').IScriptSnapshot = {
+        //   getChangeRange:(oldSnapshot)=>{
+        //     return undefined
+        //   }
+        // }
         return typescript.ScriptSnapshot.fromString(
           documentsProxy.getDocument(`file://${fileName}`).getText()
         )
