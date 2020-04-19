@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": ".",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "types": []
   },
   "include": ["completion.ts"]

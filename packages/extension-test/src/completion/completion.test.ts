@@ -1,4 +1,9 @@
-import { activateExtension, createTestFile, run, TestCase } from '../util/test-utils'
+import {
+  activateExtension,
+  createTestFile,
+  run,
+  TestCase,
+} from '../util/test-utils'
 
 describe('completion', () => {
   before(async () => {
@@ -9,8 +14,10 @@ describe('completion', () => {
     const testCases: readonly TestCase[] = [
       {
         input: '',
-        type: 'Array.fro',
-        expect: `Array.from(arrayLike)`,
+        type: `let x = []
+x.m`,
+        expect: `let x = []
+x.map(callbackfn)`,
         afterTypeCommands: [
           'editor.action.triggerSuggest',
           'acceptSelectedSuggestion',
