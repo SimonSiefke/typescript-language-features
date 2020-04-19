@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNEXT"],
     "target": "ES2019", // That is what vscode extensions support
-    "rootDir": ".",
 
     "declaration": true,
     "declarationMap": true,

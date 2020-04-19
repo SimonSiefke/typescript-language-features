@@ -302,6 +302,9 @@ const createTypescriptLanguageService = (absolutePath: string) => {
     },
     getScriptSnapshot: (fileName) => {
       if (documentsProxy.hasDocument(`file://${fileName}`)) {
+        // if (!documentsProxy.getDocument(`file://${fileName}`).getText()) {
+        //   throw new Error(`${fileName} not found`)
+        // }
         // let s:import('typescript').IScriptSnapshot = {
         //   getChangeRange:(oldSnapshot)=>{
         //     return undefined
@@ -314,7 +317,7 @@ const createTypescriptLanguageService = (absolutePath: string) => {
       if (!(fileName in cachedScriptSnapshots)) {
         const content = typescript.sys.readFile(fileName)
         if (!content) {
-          console.log('file not found ' + fileName)
+          console.log('NOT FOUND ' + fileName)
           return undefined
         }
         cachedScriptSnapshots[fileName] = typescript.ScriptSnapshot.fromString(
@@ -462,60 +465,7 @@ const getLanguageService = (fsPath: string) => {
   return languageService
 }
 
-// const cachePreCompletions: {
-//   [uri: string]: {
-//     readonly version: number
-//     readonly completionList: CompletionList | undefined
-//     readonly position: Position
-//   }
-// } = Object.create(null)
-
-// documentsProxy.onDidChangeTextDocument(
-//   (textDocument, oldText, oldDocument, newText, newDocument, changes) => {
-//     if (changes.length === 0) {
-//       return
-//     }
-//     const change = changes[0]
-//     if (!('range' in change)) {
-//       return
-//     }
-//     const offset = documentsProxy
-//       .getDocument(textDocument.uri)
-//       .offsetAt(change.range.start)
-//     const fsPath = textDocument.uri.slice(7)
-//     const typescriptLanguageService = getLanguageService(fsPath)
-//     const completions = typescriptLanguageService.getCompletionsAtPosition(
-//       fsPath,
-//       offset,
-//       {
-//         includeCompletionsForModuleExports: true,
-//         includeCompletionsWithInsertText: true,
-//       }
-//     )
-//     if (!completions) {
-//       return completions
-//     }
-//     const completionList = toCompletionList(completions, fsPath, offset)
-//     cachePreCompletions[textDocument.uri] = {
-//       version: textDocument.version as number,
-//       completionList,
-//       position: change.range.end,
-//     }
-//   }
-// )
-
 connectionProxy.onCompletion = ({ textDocument, position }) => {
-  // if (
-  //   textDocument.uri in cachePreCompletions &&
-  //   cachePreCompletions[textDocument.uri].version ===
-  //     documentsProxy.getDocument(textDocument.uri).version &&
-  //   cachePreCompletions[textDocument.uri].position.line === position.line &&
-  //   cachePreCompletions[textDocument.uri].position.character ===
-  //     position.character
-  // ) {
-  //   console.log('CACHE HIT')
-  //   return cachePreCompletions[textDocument.uri].completionList
-  // }
   const fsPath = textDocument.uri.slice(7)
   const typescriptLanguageService = getLanguageService(fsPath)
   const offset = documentsProxy.getDocument(textDocument.uri).offsetAt(position)

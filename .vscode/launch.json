@@ -55,7 +55,7 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
-        // "--disable-extensions",
+        "--disable-extensions",
         "/tmp/mui-slowness"
       ],
       "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"]

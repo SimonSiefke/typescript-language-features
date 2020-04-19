@@ -11,7 +11,8 @@
     // playgroudn options
     "strict": false,
     "noUnusedParameters": false,
-    "noUnusedLocals": false
+    "noUnusedLocals": false,
+    "types": []
   },
   "include": ["src"]
 }
