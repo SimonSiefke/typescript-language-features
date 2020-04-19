@@ -312,8 +312,13 @@ const createTypescriptLanguageService = (absolutePath: string) => {
         )
       }
       if (!(fileName in cachedScriptSnapshots)) {
+        const content = typescript.sys.readFile(fileName)
+        if (!content) {
+          console.log('file not found ' + fileName)
+          return undefined
+        }
         cachedScriptSnapshots[fileName] = typescript.ScriptSnapshot.fromString(
-          typescript.sys.readFile(fileName) as string
+          content
         )
       }
       return cachedScriptSnapshots[fileName]
