@@ -2,7 +2,7 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import { downloadAndUnzipVSCode, runTests as _runTests } from 'vscode-test'
 
-const VSCODE_VERSION = '1.44.2'
+const VSCODE_VERSION = '1.75.1'
 
 export interface Test {
   readonly path: string

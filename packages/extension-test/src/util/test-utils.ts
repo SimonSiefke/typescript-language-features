@@ -150,7 +150,7 @@ async function typeDelete(times: number = 1): Promise<void> {
         )
       }
     })
-    resolve()
+    resolve(undefined)
   })
 }
 async function type(
@@ -195,7 +195,7 @@ async function waitForEdits(timeout: 'never' | number) {
   return new Promise((resolve) => {
     const disposable = vscode.workspace.onDidChangeTextDocument(() => {
       disposable.dispose()
-      resolve()
+      resolve(undefined)
     })
     if (timeout !== 'never') {
       setTimeout(resolve, timeout)
