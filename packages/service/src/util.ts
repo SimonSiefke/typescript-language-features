@@ -55,9 +55,8 @@ const cachedFileExists: { [key: string]: boolean } = Object.create(null)
 
 const cachedDirectoryExists: { [key: string]: boolean } = Object.create(null)
 
-const cachedReadFile: { [key: string]: string | undefined } = Object.create(
-  null
-)
+const cachedReadFile: { [key: string]: string | undefined } =
+  Object.create(null)
 
 const cachedResolvedModules: {
   [dirname: string]: {
@@ -158,10 +157,14 @@ export const createTypescriptLanguageService = (
       redirectedReference,
       options
     ) => {
-      return typeDirectiveNames.map(
-        (typeDirectiveName) =>
+      return typeDirectiveNames.map((typeDirectiveName) => {
+        const nameIsString = typeof typeDirectiveName === 'string'
+        const strName = nameIsString
+          ? typeDirectiveName
+          : typeDirectiveName.fileName.toLowerCase()
+        const { resolvedTypeReferenceDirective } =
           typescript.resolveTypeReferenceDirective(
-            typeDirectiveName,
+            strName,
             containingFile,
             options,
             {
@@ -170,8 +173,9 @@ export const createTypescriptLanguageService = (
               directoryExists: typescript.sys.directoryExists,
               getCurrentDirectory: typescript.sys.getCurrentDirectory,
             }
-          ).resolvedTypeReferenceDirective
-      )
+          )
+        return resolvedTypeReferenceDirective
+      })
     },
     resolveModuleNames: (
       moduleNames,
@@ -189,23 +193,22 @@ export const createTypescriptLanguageService = (
           console.log('RESOLVE module names' + dirname + moduleName)
           cachedResolvedModules[dirname] =
             cachedResolvedModules[dirname] || Object.create(null)
-          cachedResolvedModules[dirname][
-            moduleName
-          ] = typescript.resolveModuleName(
-            moduleName,
-            containingFile,
-            compilationSettings,
-            {
-              fileExists: typescript.sys.fileExists,
-              readFile: (path) => {
-                console.log('READ FILE' + path)
-                return typescript.sys.readFile(path)
-              },
-              directoryExists: typescript.sys.directoryExists,
-              getCurrentDirectory: () => currentDirectory,
-              getDirectories: typescript.sys.getDirectories,
-            }
-          ).resolvedModule
+          cachedResolvedModules[dirname][moduleName] =
+            typescript.resolveModuleName(
+              moduleName,
+              containingFile,
+              compilationSettings,
+              {
+                fileExists: typescript.sys.fileExists,
+                readFile: (path) => {
+                  console.log('READ FILE' + path)
+                  return typescript.sys.readFile(path)
+                },
+                directoryExists: typescript.sys.directoryExists,
+                getCurrentDirectory: () => currentDirectory,
+                getDirectories: typescript.sys.getDirectories,
+              }
+            ).resolvedModule
         }
         return cachedResolvedModules[dirname][moduleName]
       })
@@ -218,9 +221,8 @@ export const createTypescriptLanguageService = (
       if (!(directory in cachedDirectoryExists)) {
         if (directory.startsWith(configDirname)) {
           // process only files inside folder
-          cachedDirectoryExists[directory] = typescript.sys.directoryExists(
-            directory
-          )
+          cachedDirectoryExists[directory] =
+            typescript.sys.directoryExists(directory)
           console.log('directory exists' + directory)
         } else {
           cachedDirectoryExists[directory] = false
@@ -280,9 +282,8 @@ export const createTypescriptLanguageService = (
           console.log('NOT FOUND ' + fileName)
           return undefined
         }
-        cachedScriptSnapshots[fileName] = typescript.ScriptSnapshot.fromString(
-          content
-        )
+        cachedScriptSnapshots[fileName] =
+          typescript.ScriptSnapshot.fromString(content)
       }
       return cachedScriptSnapshots[fileName]
     },

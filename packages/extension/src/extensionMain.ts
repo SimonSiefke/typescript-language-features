@@ -5,7 +5,7 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
-} from 'vscode-languageclient'
+} from 'vscode-languageclient/node'
 
 const getIntellicodePath: () => string | undefined = () => {
   const intelliCodeExtension = vscode.extensions.getExtension(
@@ -20,9 +20,8 @@ const getIntellicodePath: () => string | undefined = () => {
 const getTypeScriptPathFromBuiltInVsCodeTypeScriptExtension: () =>
   | string
   | undefined = () => {
-  const typeScriptLanguageFeaturesExtension = vscode.extensions.getExtension(
-    'vscode.typescript'
-  )
+  const typeScriptLanguageFeaturesExtension =
+    vscode.extensions.getExtension('vscode.typescript')
   if (!typeScriptLanguageFeaturesExtension) {
     return undefined
   }
@@ -87,8 +86,8 @@ const languageClient = new LanguageClient(
 )
 
 export const activate = async (context: vscode.ExtensionContext) => {
-  context.subscriptions.push(languageClient.start())
-  await languageClient.onReady()
+  await languageClient.start()
+  context.subscriptions.push(languageClient)
   if (
     process.env.NODE_ENV !== 'production' &&
     process.env.NODE_ENV !== 'test'

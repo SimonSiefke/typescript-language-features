@@ -32,7 +32,7 @@ import {
   TextEdit,
   WorkDoneProgressParams,
   WorkspaceEdit,
-} from 'vscode-languageserver'
+} from 'vscode-languageserver/node'
 import {
   CodeActionParams,
   CodeLensParams,
@@ -154,7 +154,7 @@ export const connectionProxy: ConnectionProxy = {
   sendDiagnostics: connection.sendDiagnostics.bind(connection),
   // @ts-ignore TODO
   onRequest: (
-    type: RequestType<any, any, any, any>,
+    type: RequestType<any, any, any>,
     handler: RequestHandler<any, any, any>
   ) => connection.onRequest(type, runSafeAsync(handler, 'onRequest')),
   // onDidChangeWatchedFiles: ()
