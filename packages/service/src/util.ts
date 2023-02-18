@@ -157,10 +157,14 @@ export const createTypescriptLanguageService = (
       redirectedReference,
       options
     ) => {
-      return typeDirectiveNames.map(
-        (typeDirectiveName) =>
+      return typeDirectiveNames.map((typeDirectiveName) => {
+        const nameIsString = typeof typeDirectiveName === 'string'
+        const strName = nameIsString
+          ? typeDirectiveName
+          : typeDirectiveName.fileName.toLowerCase()
+        const { resolvedTypeReferenceDirective } =
           typescript.resolveTypeReferenceDirective(
-            typeDirectiveName.toString(),
+            strName,
             containingFile,
             options,
             {
@@ -169,8 +173,9 @@ export const createTypescriptLanguageService = (
               directoryExists: typescript.sys.directoryExists,
               getCurrentDirectory: typescript.sys.getCurrentDirectory,
             }
-          ).resolvedTypeReferenceDirective
-      )
+          )
+        return resolvedTypeReferenceDirective
+      })
     },
     resolveModuleNames: (
       moduleNames,
