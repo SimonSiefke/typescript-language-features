@@ -149,102 +149,107 @@ const getParameterListParts: (
   return result
 }
 
-export const onCompletionResolve = ({
-  typescript,
-  positionAt,
-  offsetAt,
-}: {
-  typescript: typeof import('typescript/lib/typescript')
-  positionAt: (fsPath: string, offset: number) => Position
-  offsetAt: (fsPath: string, position: Position) => number
-}) => (languageService: LanguageService, completionItem: CompletionItem) => {
-  const details = languageService.getCompletionEntryDetails(
-    completionItem.data.fsPath,
-    completionItem.data.offset,
-    completionItem.data.name,
-    {
-      semicolons: typescript.SemicolonPreference.Remove,
-    },
-    completionItem.data.source,
-    {
-      quotePreference: 'single',
-    }
-  )
-  if (!details) {
-    return completionItem
-  }
-  completionItem.detail = typescript.displayPartsToString(details.displayParts)
-  if (details.source) {
-    const importPath = typescript.displayPartsToString(details.source)
-    const autoImportLabel = `Auto import from ${importPath}`
-    completionItem.detail = `${autoImportLabel}\n${completionItem.detail}`
-  }
-  if (details.codeActions && details.codeActions.length) {
-    const additionalTextEdits: TextEdit[] = []
-    for (const tsAction of details.codeActions) {
-      for (const change of tsAction.changes) {
-        for (const textChange of change.textChanges) {
-          const textEdit: TextEdit = {
-            newText: textChange.newText,
-            range: {
-              start: positionAt(
-                completionItem.data.fsPath,
-                textChange.span.start
-              ),
-              end: positionAt(
-                completionItem.data.fsPath,
-                textChange.span.start + textChange.span.length
-              ),
-            },
-          }
-          additionalTextEdits.push(textEdit)
-        }
-      }
-    }
-    completionItem.additionalTextEdits = additionalTextEdits
-  }
-
-  if (completionItem.data.maybeCompleteFunctionCall) {
-    // const text = documentsProxy
-    //   .getDocument(`file://${completionItem.data.fsPath}`)
-    //   .getText()
-    // const after = virtualFileSystemUtils.getLineTextAfter(
-    //   text,
-    //   completionItem.data.offset
-    // )
-    // const hasAlreadyFunctionCall = after.match(/^[a-z_$0-9]*\s*\(/gi)
-    // if (hasAlreadyFunctionCall) {
-    // return
-    // }
-    const listParts = getParameterListParts(details.displayParts)
-    if (!listParts.isFunctionCall) {
+export const onCompletionResolve =
+  ({
+    typescript,
+    positionAt,
+    offsetAt,
+  }: {
+    typescript: typeof import('typescript/lib/typescript')
+    positionAt: (fsPath: string, offset: number) => Position
+    offsetAt: (fsPath: string, position: Position) => number
+  }) =>
+  (languageService: LanguageService, completionItem: CompletionItem) => {
+    const details = languageService.getCompletionEntryDetails(
+      completionItem.data.fsPath,
+      completionItem.data.offset,
+      completionItem.data.name,
+      {
+        semicolons: typescript.SemicolonPreference.Remove,
+      },
+      completionItem.data.source,
+      {
+        quotePreference: 'single',
+      },
+      undefined
+    )
+    if (!details) {
       return completionItem
     }
-    let parameters = listParts.parts
-      .map((part, index) => `\${${index + 1}:${part.text}}`)
-      .join(', ')
-    if (listParts.hasOptionalParameters) {
-      parameters += '${0}'
+    completionItem.detail = typescript.displayPartsToString(
+      details.displayParts
+    )
+    if (details.source) {
+      const importPath = typescript.displayPartsToString(details.source)
+      const autoImportLabel = `Auto import from ${importPath}`
+      completionItem.detail = `${autoImportLabel}\n${completionItem.detail}`
     }
-    let parameterCount = listParts.parts.length
-    if (listParts.hasOptionalParameters) {
-      parameterCount++
-    }
-    if (parameterCount > 0) {
-      completionItem.command = {
-        title: 'triggerParameterHints',
-        command: 'editor.action.triggerParameterHints',
+    if (details.codeActions && details.codeActions.length) {
+      const additionalTextEdits: TextEdit[] = []
+      for (const tsAction of details.codeActions) {
+        for (const change of tsAction.changes) {
+          for (const textChange of change.textChanges) {
+            const textEdit: TextEdit = {
+              newText: textChange.newText,
+              range: {
+                start: positionAt(
+                  completionItem.data.fsPath,
+                  textChange.span.start
+                ),
+                end: positionAt(
+                  completionItem.data.fsPath,
+                  textChange.span.start + textChange.span.length
+                ),
+              },
+            }
+            additionalTextEdits.push(textEdit)
+          }
+        }
       }
+      completionItem.additionalTextEdits = additionalTextEdits
     }
 
-    /**
-     * Usually it is not allowed to manipulate the insertText inside `completionResolve` because `completionResolve` is not always called (e.g. if the user accepts the completion before `completionResolve` has finished). However it is significantly faster this way and the only downside is that if the user is typing fast, then the insertText for `console` will only be `log` instead of `log()`
-     */
-    completionItem.insertText = `${
-      completionItem.insertText || completionItem.label
-    }(${parameters})`
-    completionItem.insertTextFormat = InsertTextFormat.Snippet
-  }
+    if (completionItem.data.maybeCompleteFunctionCall) {
+      // const text = documentsProxy
+      //   .getDocument(`file://${completionItem.data.fsPath}`)
+      //   .getText()
+      // const after = virtualFileSystemUtils.getLineTextAfter(
+      //   text,
+      //   completionItem.data.offset
+      // )
+      // const hasAlreadyFunctionCall = after.match(/^[a-z_$0-9]*\s*\(/gi)
+      // if (hasAlreadyFunctionCall) {
+      // return
+      // }
+      const listParts = getParameterListParts(details.displayParts)
+      if (!listParts.isFunctionCall) {
+        return completionItem
+      }
+      let parameters = listParts.parts
+        .map((part, index) => `\${${index + 1}:${part.text}}`)
+        .join(', ')
+      if (listParts.hasOptionalParameters) {
+        parameters += '${0}'
+      }
+      let parameterCount = listParts.parts.length
+      if (listParts.hasOptionalParameters) {
+        parameterCount++
+      }
+      if (parameterCount > 0) {
+        completionItem.command = {
+          title: 'triggerParameterHints',
+          command: 'editor.action.triggerParameterHints',
+        }
+      }
 
-  return completionItem
-}
+      /**
+       * Usually it is not allowed to manipulate the insertText inside `completionResolve` because `completionResolve` is not always called (e.g. if the user accepts the completion before `completionResolve` has finished). However it is significantly faster this way and the only downside is that if the user is typing fast, then the insertText for `console` will only be `log` instead of `log()`
+       */
+      completionItem.insertText = `${
+        completionItem.insertText || completionItem.label
+      }(${parameters})`
+      completionItem.insertTextFormat = InsertTextFormat.Snippet
+    }
+
+    return completionItem
+  }
