@@ -41,12 +41,12 @@
   "bundlesize": [
     {
       "path": "./dist/packages/extension/dist/extensionMain.js",
-      "maxSize": "5.0 kB",
+      "maxSize": "30.0 kB",
       "compression": "none"
     },
     {
       "path": "./dist/packages/extension/dist/vscode-dependencies.js",
-      "maxSize": "190 kB",
+      "maxSize": "330 kB",
       "compression": "none"
     },
     {

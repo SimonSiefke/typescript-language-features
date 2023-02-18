@@ -13,7 +13,7 @@
     "noImplicitAny": false,
     "noUnusedParameters": false,
     "noUnusedLocals": false,
-    "types": []
+    "types": ["node"]
   },
   "include": ["src"]
 }
